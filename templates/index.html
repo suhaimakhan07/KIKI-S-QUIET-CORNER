@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiki's Quiet Corner</title>
+    <link rel="stylesheet" href="../static/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    
+
+
+
+</head>
+<body>
+    
+    <!-- Header  -->
+    <header>
+        <div class="logo">
+            <h1><a href="/">Kiki's Quiet Corner</a></h1>
+        </div>
+        <div class="nav">
+            <ul>
+                
+                <li><a href="/notes" target="_blank">Dear Diary</a></li>
+                
+                <li><a href="/about" target="_blank">About Us</a></li>
+                
+            </ul>
+        </div>
+    </header>
+    
+    <!-- Main  -->
+    <div class="background-container">
+        <div class="pomodoro-timer">
+            <h2>Pomodoro Timer</h2>
+            <div class="timer-controls">
+                <button onclick="setTimer(25)">25 Min</button>
+                <button onclick="setTimer(5)">5 Min</button>
+                <button onclick="setTimer(15)">15 Min</button>
+            </div>
+            <div class="timer-display" id="timerDisplay">25:00</div>
+            <button class="start-btn" onclick="startTimer()">Start</button>
+            <button class="pause-btn" onclick="pauseTimer()">Pause</button>
+            <button class="reset-btn" onclick="resetTimer()">Reset</button>
+        </div>
+        <div class="gif-container">
+            <img src="{{ url_for('static', filename='pixel-9225.gif') }}" alt="Cute GIF">
+        </div>
+    </div>
+    <script>
+       let timerInterval;
+let totalSeconds = 1500; // Default 25 minutes
+let initialSeconds = 1500; // Store the initial time
+let isPaused = false; // Track whether the timer is paused
+
+function setTimer(minutes) {
+    totalSeconds = minutes * 60;
+    initialSeconds = totalSeconds; // Save the initial time
+    updateDisplay();
+    clearInterval(timerInterval);
+    timerInterval = null; // Stop any ongoing timer
+    isPaused = false;
+}
+
+function updateDisplay() {
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    document.getElementById('timerDisplay').textContent =
+    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
+function startTimer() {
+    if (timerInterval) return; // Prevent multiple intervals
+    timerInterval = setInterval(() => {
+        if (totalSeconds > 0) {
+            totalSeconds--;
+            updateDisplay();
+        } else {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            alert('Timeâ€™s up!');
+        }
+    }, 1000);
+    isPaused = false; // Reset pause state
+}
+
+function pauseTimer() {
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        isPaused = true;
+    } else if (isPaused) {
+        startTimer(); // Restart the timer if it's paused
+    }
+}
+
+function resetTimer() {
+    clearInterval(timerInterval);
+    timerInterval = null;
+    totalSeconds = initialSeconds; // Reset to the initial time set
+    updateDisplay();
+    isPaused = false;
+}
+
+// Initialize display
+updateDisplay();
+
+    </script>
+    
+    <!-- Footer  -->
+     <!-- Footer -->
+     <footer>
+        
+        <p>&copy; 2024 Kiki's Quiet Corner. All rights reserved</p>
+        
+    </footer>
+
+    
+    
+</body>
+</html>

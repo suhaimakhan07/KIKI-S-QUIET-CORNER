@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dear Diary</title>
+    <!-- Use url_for to link the CSS file -->
+    <link rel="stylesheet" href="../static/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+</head>
+<body style="background-image: url(../static/image.jpg); background-position: center; background-size: cover;"></body>
+
+    <!-- Header -->
+    <header>
+        <div class="logo">
+            <h1><a href="/">Kiki's Quiet Corner</a></h1>
+        </div>
+        <div class="nav">
+            <ul>
+                
+                <li><a href="/notes" target="_blank">Dear Diary</a></li>
+                
+                <li><a href="/about" target="_blank">About Us</a></li>
+            </ul>
+        </div>
+    </header>
+    
+    <!-- Diary Section -->
+    <main>
+        <div class="diary-container">
+            <h2>Dear Diary</h2>
+            <textarea id="diaryInput" placeholder="Write your thoughts here..."></textarea>
+            <div class="buttons">
+                <button class="save-btn" onclick="saveNote()">Save Note</button>
+            </div>
+            <div class="saved-notes">
+                <h3>Saved Notes:</h3>
+                <ul id="notesList"></ul>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2024 Kiki's Quiet Corner. All rights reserved.</p>
+    </footer>
+
+    <!-- Ensure JavaScript works correctly -->
+    <script>
+        // Fetch notes from the database and display them
+        function fetchNotes() {
+            fetch('/api/notes')
+                .then(response => response.json())
+                .then(data => {
+                    const notesList = document.getElementById('notesList');
+                    notesList.innerHTML = ''; // Clear the list
+                    data.forEach(note => {
+                        const noteItem = document.createElement('li');
+                        const noteText = document.createElement('span');
+                        noteText.textContent = note[1];
+    
+                        const editButton = document.createElement('button');
+                        editButton.textContent = "Edit";
+                        editButton.className = "edit-btn";
+                        editButton.onclick = () => editNote(note[0], noteText);
+    
+                        const deleteButton = document.createElement('button');
+                        deleteButton.textContent = "Delete";
+                        deleteButton.className = "delete-btn";
+                        deleteButton.onclick = () => deleteNote(note[0]);
+    
+                        noteItem.appendChild(noteText);
+                        noteItem.appendChild(editButton);
+                        noteItem.appendChild(deleteButton);
+                        notesList.appendChild(noteItem);
+                    });
+                });
+        }
+    
+        // Save a new note
+        function saveNote() {
+            const diaryInput = document.getElementById('diaryInput');
+            const content = diaryInput.value.trim();
+            if (content !== "") {
+                fetch('/api/notes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content })
+                })
+                .then(response => {
+                    if (response.ok) {
+                        diaryInput.value = ""; // Clear the textarea
+                        fetchNotes(); // Refresh the list
+                    } else {
+                        alert("Failed to save note.");
+                    }
+                });
+            } else {
+                alert("Please write something before saving.");
+            }
+        }
+    
+        // Delete a note
+        function deleteNote(noteId) {
+            fetch(`/api/notes/${noteId}`, { method: 'DELETE' })
+                .then(response => {
+                    if (response.ok) {
+                        fetchNotes(); // Refresh the list
+                    } else {
+                        alert("Failed to delete note.");
+                    }
+                });
+        }
+    
+        // Edit a note
+        function editNote(noteId, noteText) {
+            const updatedText = prompt("Edit your note:", noteText.textContent);
+            if (updatedText !== null && updatedText.trim() !== "") {
+                fetch(`/api/notes/${noteId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content: updatedText })
+                })
+                .then(response => {
+                    if (response.ok) {
+                        fetchNotes(); // Refresh the list
+                    } else {
+                        alert("Failed to update note.");
+                    }
+                });
+            }
+        }
+    
+        // Initialize notes on page load
+        document.addEventListener('DOMContentLoaded', fetchNotes);
+    </script>
+    
+</body>
+</html>
+
